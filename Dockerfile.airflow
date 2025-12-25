@@ -1,0 +1,9 @@
+FROM apache/airflow:3.1.5
+
+USER airflow
+
+# Install dbt
+RUN pip install --no-cache-dir dbt-postgres==1.7.3
+
+USER airflow
+

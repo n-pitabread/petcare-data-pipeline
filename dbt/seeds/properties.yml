@@ -1,0 +1,82 @@
+version: 2
+
+seeds:
+  - name: stg_experts
+    description: "Reference data for pet care experts with their specialties and experience"
+    config:
+      schema: staging
+    columns:
+      - name: expert_id
+        description: "Unique identifier for the expert"
+        tests:
+          - unique
+          - not_null
+      - name: name
+        description: "Full name of the expert"
+        tests:
+          - not_null
+      - name: specialty
+        description: "Expert's area of specialization (e.g., Trainer, Nutritionist, Behavior Specialist, Groomer, General Vet)"
+        tests:
+          - not_null
+      - name: years_experience
+        description: "Number of years of experience"
+        tests:
+          - not_null
+
+  - name: stg_owners
+    description: "Reference data for pet owners with contact information and signup details"
+    config:
+      schema: staging
+    columns:
+      - name: owner_id
+        description: "Unique identifier for the owner"
+        tests:
+          - unique
+          - not_null
+      - name: name
+        description: "Full name of the owner"
+        tests:
+          - not_null
+      - name: email
+        description: "Email address of the owner"
+        tests:
+          - not_null
+      - name: signup_date
+        description: "Date when the owner signed up"
+        tests:
+          - not_null
+      - name: country
+        description: "Country where the owner is located"
+        tests:
+          - not_null
+
+  - name: stg_pets
+    description: "Reference data for pets with breed information and owner relationships"
+    config:
+      schema: staging
+    columns:
+      - name: pet_id
+        description: "Unique identifier for the pet"
+        tests:
+          - unique
+          - not_null
+      - name: name
+        description: "Name of the pet"
+        tests:
+          - not_null
+      - name: breed
+        description: "Breed of the pet"
+        tests:
+          - not_null
+      - name: dob
+        description: "Date of birth of the pet"
+        tests:
+          - not_null
+      - name: owner_id
+        description: "Foreign key to owners table"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('owners')
+              field: owner_id

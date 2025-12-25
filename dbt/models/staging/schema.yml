@@ -1,0 +1,41 @@
+version: 2
+
+sources:
+  - name: kafka_raw 
+    schema: public
+    tables:
+      - name: raw_stream
+        description: "Raw stream data ingested from Kafka"
+
+models:
+  - name: stg_consultations
+    description: "Staging model for consultations with data cleaning and validation"
+    config:
+      schema: staging
+      materialized: incremental
+      unique_key: consultation_id
+      incremental_strategy: append
+    columns:
+      - name: consultation_id
+        description: "Unique identifier for the consultation"
+        tests:
+          - unique
+          - not_null
+      - name: consultation_topic
+        description: "Consultation topic"
+        tests:
+          - not_null
+      - name: pet_id
+        description: "Foreign key to pets table"
+        tests:
+          - not_null
+      - name: expert_id
+        description: "Foreign key to experts table"
+        tests:
+          - not_null
+      - name: created_at
+        description: "Date and time of the consultation"
+      - name: duration_minutes
+        description: "Duration of consultation in minutes"
+      - name: ingested_at
+        description: "Timestamp when the record was ingested into the database"

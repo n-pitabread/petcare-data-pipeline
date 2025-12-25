@@ -1,0 +1,12 @@
+petcare_pipeline:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('POSTGRES_HOST', 'postgres') }}"
+      port: "{{ env_var('POSTGRES_PORT', '5432') | as_number }}"
+      user: "{{ env_var('POSTGRES_USER', 'dbt_user') }}"
+      password: "{{ env_var('POSTGRES_PASSWORD', 'dbt_pass') }}"
+      dbname: "{{ env_var('POSTGRES_DB', 'dbt_db') }}"
+      schema: "{{ env_var('DBT_SCHEMA', 'petcare') }}"
+      threads: 4
