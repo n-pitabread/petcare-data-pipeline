@@ -11,8 +11,6 @@ models:
   - name: stg_consultations
     description: "Staging model for consultations with data cleaning and validation"
     config:
-      schema: staging
-      materialized: incremental
       unique_key: consultation_id
       incremental_strategy: append
     columns:

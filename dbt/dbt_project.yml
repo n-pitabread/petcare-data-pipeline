@@ -19,7 +19,15 @@ clean-targets:
 models:
   petcare_pipeline:
     staging:
-      +materialized: view
-    analytics:
       +materialized: table
+      +schema: staging
+    intermediate:
+      +materialized: view
+      +schema: intermediate
+    marts:
+      +materialized: table
+      +schema: marts
+    features:
+      +materialized: table
+      +schema: features
 

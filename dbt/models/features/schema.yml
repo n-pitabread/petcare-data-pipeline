@@ -1,0 +1,9 @@
+version: 2
+
+models:
+  - name: features_churn_dataset
+    description: "Features model for churn dataset"
+  - name: features_pet_profiles
+    description: "Features model for pet profiles"
+  - name: features_consultation_metrics
+    description: "Features model for consultation metrics"

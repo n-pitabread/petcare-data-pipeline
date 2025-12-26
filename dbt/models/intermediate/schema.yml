@@ -1,0 +1,7 @@
+version: 2
+
+models:
+  - name: int_pet_profiles
+    description: "Intermediate model for pet profiles"
+  - name: int_consultation_metrics
+    description: "Intermediate model for consultation metrics"

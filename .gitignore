@@ -4,6 +4,10 @@ dbt/target/
 dbt/dbt_internal_packages/
 dbt/logs/
 
+# MLflow
+mlflow/artifacts/
+mlflow/mlruns/
+
 # Postgres init
 postgres/data/
 

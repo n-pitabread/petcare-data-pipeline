@@ -1,0 +1,82 @@
+version: 2
+
+models:
+  - name: mart_pet_demographics
+    description: "Mart model for pet demographics aggregated by breed and age bucket"
+    config:
+      schema: marts
+      materialized: table
+    columns:
+      - name: breed
+        description: "Pet breed"
+      - name: age_bucket
+        description: "Age bucket category for the pet"
+      - name: pet_count
+        description: "Number of pets in this breed and age bucket combination"
+      - name: avg_age_years
+        description: "Average age in years for pets in this group"
+      - name: unique_owners
+        description: "Number of unique owners for pets in this group"
+
+  - name: mart_owner_engagement
+    description: "Mart model for owner engagement metrics including consultation history and churn flag"
+    config:
+      schema: marts
+      materialized: table
+    columns:
+      - name: owner_id
+        description: "Unique identifier for the owner"
+      - name: owner_name
+        description: "Name of the owner"
+      - name: email
+        description: "Email address of the owner"
+      - name: country
+        description: "Country where the owner is located"
+      - name: signup_date
+        description: "Date when the owner signed up"
+      - name: days_since_signup
+        description: "Number of days since the owner signed up"
+      - name: num_pets
+        description: "Number of pets owned by this owner"
+      - name: total_consultations
+        description: "Total number of consultations for this owner"
+      - name: avg_consultation_duration
+        description: "Average duration of consultations in minutes"
+      - name: total_consultation_minutes
+        description: "Total consultation time in minutes"
+      - name: first_consultation_date
+        description: "Date of the first consultation"
+      - name: last_consultation_date
+        description: "Date of the most recent consultation"
+      - name: days_since_last_consultation
+        description: "Number of days since the last consultation"
+      - name: churn_flag
+        description: "Flag indicating if the owner has churned (1) or not (0)"
+
+  - name: mart_expert_performance
+    description: "Mart model for expert performance metrics including consultation statistics"
+    config:
+      schema: marts
+      materialized: table
+    columns:
+      - name: expert_id
+        description: "Unique identifier for the expert"
+      - name: expert_name
+        description: "Name of the expert"
+      - name: specialty
+        description: "Specialty area of the expert"
+      - name: years_experience
+        description: "Years of experience of the expert"
+      - name: total_consultations
+        description: "Total number of consultations conducted by this expert"
+      - name: unique_pets_served
+        description: "Number of unique pets served by this expert"
+      - name: avg_consultation_duration
+        description: "Average duration of consultations in minutes"
+      - name: total_consultation_minutes
+        description: "Total consultation time in minutes"
+      - name: first_consultation_date
+        description: "Date of the first consultation conducted by this expert"
+      - name: last_consultation_date
+        description: "Date of the most recent consultation conducted by this expert"
+

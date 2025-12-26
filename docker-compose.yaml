@@ -1,11 +1,21 @@
+x-common-postgres-env: &common-postgres-env
+  POSTGRES_HOST: postgres
+  POSTGRES_PORT: 5432
+  POSTGRES_USER: dbt_user
+  POSTGRES_PASSWORD: dbt_pass
+  POSTGRES_DB: dbt_db
+
+x-common-kafka-env: &common-kafka-env
+  KAFKA_BOOTSTRAP_SERVERS: kafka-broker:29092
+  KAFKA_CONSUMER_GROUP_ID: kafka-consumer-group
+  KAFKA_TOPICS: .*
+
 services:
   postgres:
     container_name: postgres
     image: postgres:16
     environment:
-      POSTGRES_USER: dbt_user
-      POSTGRES_PASSWORD: dbt_pass
-      POSTGRES_DB: dbt_db
+      <<: *common-postgres-env
     ports:
       - "5432:5432"
     volumes:
@@ -72,6 +82,9 @@ services:
     image: petcare-webapp:latest
     ports:
       - "8000:8000"
+    environment:
+      <<: *common-kafka-env
+      CONSULTATION_CURSOR_PATH: ./webapp/consultation_cursor.txt
     depends_on:
       - kafka
     networks:
@@ -80,10 +93,33 @@ services:
   kafka-consumer:
     container_name: kafka-consumer
     image: petcare-kafka-consumer:latest
+    environment:
+      <<: [*common-kafka-env, *common-postgres-env]
     depends_on:
       - kafka
       - postgres
       - webapp
+    networks:
+      - my-network
+
+  mlflow:
+    container_name: mlflow
+    image: python:3.11-slim
+    ports:
+      - "5000:5000"
+    environment:
+      - MLFLOW_BACKEND_STORE_URI=postgresql://dbt_user:dbt_pass@postgres:5432/dbt_db
+      - MLFLOW_DEFAULT_ARTIFACT_ROOT=/mlflow/artifacts
+    volumes:
+      - ./mlflow/artifacts:/mlflow/artifacts
+      - ./ml:/ml
+    working_dir: /ml
+    command: >
+      bash -c "pip install mlflow psycopg2-binary boto3 && 
+               mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri postgresql://dbt_user:dbt_pass@postgres:5432/dbt_db --default-artifact-root /mlflow/artifacts"
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - my-network
 

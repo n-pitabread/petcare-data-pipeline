@@ -2,13 +2,9 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-COPY ./webapp/requirements.txt .
-COPY ./webapp/consultation_cursor.txt .
-COPY ./webapp/app.py .
+COPY ./webapp .
 COPY ./data/consultations.json ./data/consultations.json
 
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY . .
+RUN pip install --no-cache-dir -r ./webapp/requirements.txt
 
 CMD ["python", "-m", "flask", "run", "--host=0.0.0.0", "--port=8000"]
