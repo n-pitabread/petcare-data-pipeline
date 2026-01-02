@@ -29,16 +29,22 @@ services:
 
   airflow:
     container_name: airflow
-    image: petcare-airflow:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.airflow
     ports:
       - "8080:8080"
     environment:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow_db
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_ARTIFACT_ROOT: file:/tmp/mlflow/artifacts
     volumes:
       - ./airflow/dags:/opt/airflow/dags
+      - ./dbt:/opt/airflow/dags/dbt
       - ./airflow/logs:/opt/airflow/logs
       - ./airflow/plugins:/opt/airflow/plugins
       - ./airflow/config:/opt/airflow/config
+      - /tmp/mlflow/artifacts:/tmp/mlflow/artifacts
     depends_on:
       - postgres
     networks:
@@ -79,7 +85,9 @@ services:
 
   webapp:
     container_name: webapp
-    image: petcare-webapp:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.webapp
     ports:
       - "8000:8000"
     environment:
@@ -92,7 +100,9 @@ services:
 
   kafka-consumer:
     container_name: kafka-consumer
-    image: petcare-kafka-consumer:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.consumer
     environment:
       <<: [*common-kafka-env, *common-postgres-env]
     depends_on:
@@ -104,25 +114,35 @@ services:
 
   mlflow:
     container_name: mlflow
-    image: python:3.11-slim
+    build:
+      context: .
+      dockerfile: Dockerfile.mlflow
     ports:
-      - "5000:5000"
+      - "5002:5000"
     environment:
-      - MLFLOW_BACKEND_STORE_URI=postgresql://dbt_user:dbt_pass@postgres:5432/dbt_db
-      - MLFLOW_DEFAULT_ARTIFACT_ROOT=/mlflow/artifacts
-    volumes:
-      - ./mlflow/artifacts:/mlflow/artifacts
-      - ./ml:/ml
-    working_dir: /ml
-    command: >
-      bash -c "pip install mlflow psycopg2-binary boto3 && 
-               mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri postgresql://dbt_user:dbt_pass@postgres:5432/dbt_db --default-artifact-root /mlflow/artifacts"
+      MLFLOW_DEFAULT_ARTIFACT_ROOT: file:/tmp/mlflow/artifacts
+      MLFLOW_BACKEND_STORE_URI: sqlite:///tmp/mlflow/db/mlflow.db?mode=rwc
+      WERKZEUG_ALLOWED_HOSTS: "*"
+      MLFLOW_VERBOSE: "true"
+      PYTHONUNBUFFERED: "1"
+      MLFLOW_LOG_LEVEL: "DEBUG"
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - my-network
-
+    volumes:
+      - ./mlflow/artifacts:/tmp/mlflow/artifacts
+      - ./mlflow/db:/tmp/mlflow/db
+    command: >
+      mlflow server 
+      --host 0.0.0.0 
+      --port 5000
+      --backend-store-uri sqlite:///tmp/mlflow/db/mlflow.db?mode=rwc
+      --serve-artifacts 
+      --default-artifact-root file:/tmp/mlflow/artifacts
+      --allowed-hosts airflow,*
+      --uvicorn-opts '--workers 1'
 networks:
   my-network:
     driver: bridge

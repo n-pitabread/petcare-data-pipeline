@@ -1,0 +1,25 @@
+FROM ghcr.io/mlflow/mlflow:v3.8.0
+
+USER root
+
+RUN mkdir -p /tmp/mlflow/db
+RUN chmod 777 /tmp/mlflow/db
+
+RUN pip install --no-cache-dir psycopg2-binary==2.9.9
+
+# Create entrypoint script to fix permissions, enable WAL mode, and enable Python exception logging
+RUN echo '#!/bin/bash\n\
+chmod -R 777 /tmp/mlflow/db 2>/dev/null || true\n\
+chmod -R 777 /tmp/mlflow/artifacts 2>/dev/null || true\n\
+mkdir -p /tmp/mlflow/artifacts\n\
+(while true; do\n\
+    if [ -f "/tmp/mlflow/db/mlflow.db" ]; then\n\
+        python3 -c "import sqlite3; conn = sqlite3.connect(\"/tmp/mlflow/db/mlflow.db\", timeout=30); conn.execute(\"PRAGMA journal_mode=WAL\"); conn.execute(\"PRAGMA synchronous=NORMAL\"); conn.execute(\"PRAGMA busy_timeout=30000\"); conn.close()" 2>/dev/null || true\n\
+    fi\n\
+    sleep 5\n\
+done) &\n\
+export PYTHONUNBUFFERED=1\n\
+exec "$@"' > /entrypoint.sh && \
+    chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
